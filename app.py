@@ -85,7 +85,7 @@ for year in sorted(activations_by_year.keys()):
 df = pd.DataFrame(rows)
 
 # Sort by Year (desc) and Rank (asc)
-df = df.sort_values(by=["Year", "Rank"], ascending=[False, False])
+df = df.sort_values(by=["Year", "Rank"], ascending=[False, True])
 
 # Display table without index
 st.subheader("Top 2 Activators per Year (by unique GM/SI summits)")
