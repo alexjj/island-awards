@@ -90,3 +90,11 @@ df = df.sort_values(by=["Year", "Rank"], ascending=[False, False])
 # Display table without index
 st.subheader("Top 2 Activators per Year (by unique GM/SI summits)")
 st.dataframe(df, use_container_width=True, hide_index=True)
+
+with st.expander("What is the Andre Saunders SOTA Island Award?", icon="ℹ️"):
+    st.markdown('''
+    The Andre Saunders (GM3VLB) SOTA Island Award is a special award for SOTA activators who have activated the most Island summits (GM/SI) in Scotland.
+    The award is named in memory of Andre Saunders, a passionate island activator.
+    More details of the actual award can be found on this SOTA reflector [post](https://reflector.sota.org.uk/t/andre-saunders-gm3vlb-sota-island-award/27642).
+    Tool designed by [GM5ALX](https://gm5alx.uk), source code [here](https://github.com/alexjj/island-awards).
+    ''')
