@@ -87,6 +87,31 @@ df = pd.DataFrame(rows)
 # Sort by Year (desc) and Rank (asc)
 df = df.sort_values(by=["Year", "Rank"], ascending=[False, True])
 
+current_year = datetime.now().year
+
+if current_year in activations_by_year:
+    current_year_data = activations_by_year[current_year]
+
+    # Build DataFrame
+    rows_current = []
+    for callsign, summits in current_year_data.items():
+        rows_current.append({
+            "Callsign": callsign,
+            "Summits Activated": len(summits)
+        })
+
+    df_current = pd.DataFrame(rows_current)
+
+    # Sort descending by number of summits
+    df_current = df_current.sort_values(by="Summits Activated", ascending=False)
+
+    # Display
+    st.subheader(f"All Activations in {current_year} (by unique GM/SI summits)")
+    st.dataframe(df_current, use_container_width=True, hide_index=True)
+
+else:
+    st.subheader(f"No activations found in {current_year}")
+
 # Display table without index
 st.subheader("Top 2 Activators per Year (by unique GM/SI summits)")
 st.dataframe(df, use_container_width=True, hide_index=True)
