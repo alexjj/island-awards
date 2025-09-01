@@ -114,7 +114,7 @@ if all_summits:
     most_common_code = pd.Series(all_summits).mode()[0]
 
     # look up summit name from full summit list
-    summit_info = next((s for s in summits if s["summitCode"] == most_common_code), None)
+    summit_info = next((s for s in summits if s["SummitCode"] == most_common_code), None)
     summit_name = summit_info["name"] if summit_info else "Unknown"
 
     with col2:
