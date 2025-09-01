@@ -106,7 +106,7 @@ if current_year in activations_by_year:
     df_current = df_current.sort_values(by="Summits Activated", ascending=False)
 
     # Display
-    st.subheader(f"All Activations in {current_year} (by Operator")
+    st.subheader(f"All Activations in {current_year} (by Operator)")
     st.dataframe(df_current, use_container_width=True, hide_index=True)
 
 else:
