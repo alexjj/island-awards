@@ -34,7 +34,8 @@ def get_callsign(user_id):
 # Main App
 # ----------------------
 
-st.title("GM/SI SOTA Summit Activators Analysis")
+st.set_page_config(page_title="GM3VLB SOTA Island Award", page_icon="🏝️")
+st.title("Andre Saunders SOTA Island Award")
 
 # Loading message + progress
 loading_msg = st.empty()
@@ -69,33 +70,6 @@ for idx, summit in enumerate(summits):
 # Remove loading UI
 loading_msg.empty()
 progress_bar.empty()
-
-# ----------------------
-# Top 2 Activators per Year
-# ----------------------
-
-rows = []
-for year in sorted(activations_by_year.keys()):
-    activator_data = activations_by_year[year]
-    sorted_activators = sorted(
-        activator_data.items(),
-        key=lambda x: len(x[1]),
-        reverse=True
-    )[:2]  # Top 2
-
-    for rank, (callsign, summits_set) in enumerate(sorted_activators, start=1):
-        rows.append({
-            "Year": year,
-            "Rank": rank,
-            "Callsign": callsign,
-            "Summits Activated": len(summits_set)
-        })
-
-df_top = pd.DataFrame(rows)
-df_top = df_top.sort_values(by=["Year", "Rank"], ascending=[False, True])
-
-st.subheader("Top 2 Activators per Year (by unique GM/SI summits)")
-st.dataframe(df_top, use_container_width=True, hide_index=True)
 
 # ----------------------
 # Current Year Summary
@@ -154,8 +128,46 @@ if current_year in activations_by_year:
     df_current = pd.DataFrame(rows_current)
     df_current = df_current.sort_values(by="Summits Activated", ascending=False)
 
-    st.subheader(f"All Activations in {current_year} (by unique GM/SI summits)")
+    st.subheader(f"All Activations in {current_year} (by Operator)")
     st.dataframe(df_current, use_container_width=True, hide_index=True)
 
 else:
     st.subheader(f"No activations found in {current_year}")
+
+
+# ----------------------
+# Top 2 Activators per Year
+# ----------------------
+
+rows = []
+for year in sorted(activations_by_year.keys()):
+    activator_data = activations_by_year[year]
+    sorted_activators = sorted(
+        activator_data.items(),
+        key=lambda x: len(x[1]),
+        reverse=True
+    )[:2]  # Top 2
+
+    for rank, (callsign, summits_set) in enumerate(sorted_activators, start=1):
+        rows.append({
+            "Year": year,
+            "Rank": rank,
+            "Callsign": callsign,
+            "Summits Activated": len(summits_set)
+        })
+
+df_top = pd.DataFrame(rows)
+df_top = df_top.sort_values(by=["Year", "Rank"], ascending=[False, True])
+
+st.subheader("Top 2 Activators per Year (by unique GM/SI summits)")
+st.dataframe(df_top, use_container_width=True, hide_index=True)
+
+
+
+with st.expander("What is the Andre Saunders SOTA Island Award?", icon="ℹ️"):
+    st.markdown('''
+    The Andre Saunders (GM3VLB) SOTA Island Award is a special award for SOTA activators who have activated the most Island summits (GM/SI) in Scotland.
+    The award is named in memory of Andre Saunders, a passionate island activator.
+    More details of the actual award can be found on this SOTA reflector [post](https://reflector.sota.org.uk/t/andre-saunders-gm3vlb-sota-island-award/27642).
+    Tool designed by [GM5ALX](https://gm5alx.uk), source code [here](https://github.com/alexjj/island-awards).
+    ''')
