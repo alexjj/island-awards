@@ -89,6 +89,54 @@ df = df.sort_values(by=["Year", "Rank"], ascending=[False, True])
 
 current_year = datetime.now().year
 
+col1, col2 = st.columns(2)
+
+# --- Total activations in current year ---
+total_activations = sum(len(s) for s in activations_by_year.get(current_year, {}).values())
+
+with col1:
+    st.markdown(
+        f"""
+        <div style='text-align: center;'>
+            <div style='font-size: 18px; color: grey;'>Total Activations</div>
+            <div style='font-size: 32px; font-weight: bold;'>{total_activations}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# --- Most common summit in current year ---
+all_summits = []
+for summits_set in activations_by_year.get(current_year, {}).values():
+    all_summits.extend(list(summits_set))
+
+if all_summits:
+    most_common_code = pd.Series(all_summits).mode()[0]
+
+    # look up summit name from full summit list
+    summit_info = next((s for s in summits if s["summitCode"] == most_common_code), None)
+    summit_name = summit_info["name"] if summit_info else "Unknown"
+
+    with col2:
+        st.markdown(
+            f"""
+            <div style='text-align: center;'>
+                <div style='font-size: 18px; color: grey;'>Most Common Summit</div>
+                <div style='font-size: 28px; font-weight: bold;'>{summit_name}</div>
+                <div style='font-size: 16px; color: grey;'>{most_common_code}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+else:
+    with col2:
+        st.markdown(
+            "<div style='text-align: center; color: grey;'>No activations this year</div>",
+            unsafe_allow_html=True,
+        )
+
+
+
 if current_year in activations_by_year:
     current_year_data = activations_by_year[current_year]
 
