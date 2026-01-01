@@ -58,10 +58,12 @@ for idx, summit in enumerate(summits):
         date = activation.get("activationDate")
         if not date:
             continue
+
         year = datetime.fromisoformat(date).year
         user_id = activation.get("userId")
         if user_id is None:
             continue
+
         callsign = get_callsign(user_id)
         activations_by_year[year][callsign].add(summit_code)
 
@@ -72,16 +74,33 @@ loading_msg.empty()
 progress_bar.empty()
 
 # ----------------------
-# Current Year Summary
+# Year Selection
 # ----------------------
 
-current_year = datetime.now().year
+available_years = sorted(activations_by_year.keys(), reverse=True)
 
-if current_year in activations_by_year:
+if not available_years:
+    st.warning("No activation data available.")
+    st.stop()
+
+selected_year = st.selectbox(
+    "Select year to display",
+    available_years,
+    index=0  # most recent year by default
+)
+
+# ----------------------
+# Selected Year Summary
+# ----------------------
+
+if selected_year in activations_by_year:
     col1, col2 = st.columns(2)
 
-    # --- Total activations in current year ---
-    total_activations = sum(len(s) for s in activations_by_year[current_year].values())
+    # --- Total activations in selected year ---
+    total_activations = sum(
+        len(s) for s in activations_by_year[selected_year].values()
+    )
+
     with col1:
         st.markdown(
             f"""
@@ -95,12 +114,15 @@ if current_year in activations_by_year:
 
     # --- Most common summit ---
     all_summits = []
-    for summits_set in activations_by_year[current_year].values():
+    for summits_set in activations_by_year[selected_year].values():
         all_summits.extend(list(summits_set))
 
     if all_summits:
         most_common_code = pd.Series(all_summits).mode()[0]
-        summit_info = next((s for s in summits if s["summitCode"] == most_common_code), None)
+        summit_info = next(
+            (s for s in summits if s["summitCode"] == most_common_code),
+            None
+        )
         summit_name = summit_info["name"] if summit_info else "Unknown"
 
         with col2:
@@ -116,24 +138,26 @@ if current_year in activations_by_year:
             )
 
     # ----------------------
-    # All current year activations (by callsign)
+    # All selected year activations (by callsign)
     # ----------------------
-    rows_current = []
-    for callsign, summits_set in activations_by_year[current_year].items():
-        rows_current.append({
+
+    rows = []
+    for callsign, summits_set in activations_by_year[selected_year].items():
+        rows.append({
             "Callsign": callsign,
             "Summits Activated": len(summits_set)
         })
 
-    df_current = pd.DataFrame(rows_current)
-    df_current = df_current.sort_values(by="Summits Activated", ascending=False)
+    df_year = pd.DataFrame(rows).sort_values(
+        by="Summits Activated",
+        ascending=False
+    )
 
-    st.subheader(f"All Activations in {current_year} (by Operator)")
-    st.dataframe(df_current, use_container_width=True, hide_index=True)
+    st.subheader(f"All Activations in {selected_year} (by Operator)")
+    st.dataframe(df_year, use_container_width=True, hide_index=True)
 
 else:
-    st.subheader(f"No activations found in {current_year}")
-
+    st.subheader(f"No activations found in {selected_year}")
 
 # ----------------------
 # Top 2 Activators per Year
@@ -146,7 +170,7 @@ for year in sorted(activations_by_year.keys()):
         activator_data.items(),
         key=lambda x: len(x[1]),
         reverse=True
-    )[:2]  # Top 2
+    )[:2]
 
     for rank, (callsign, summits_set) in enumerate(sorted_activators, start=1):
         rows.append({
@@ -156,18 +180,28 @@ for year in sorted(activations_by_year.keys()):
             "Summits Activated": len(summits_set)
         })
 
-df_top = pd.DataFrame(rows)
-df_top = df_top.sort_values(by=["Year", "Rank"], ascending=[False, True])
+df_top = pd.DataFrame(rows).sort_values(
+    by=["Year", "Rank"],
+    ascending=[False, True]
+)
 
 st.subheader("Top 2 Activators per Year (by unique GM/SI summits)")
 st.dataframe(df_top, use_container_width=True, hide_index=True)
 
-
+# ----------------------
+# Info Section
+# ----------------------
 
 with st.expander("What is the Andre Saunders SOTA Island Award?", icon="ℹ️"):
     st.markdown('''
-    The Andre Saunders (GM3VLB) SOTA Island Award is a special award for SOTA activators who have activated the most Island summits (GM/SI) in Scotland.
+    The Andre Saunders (GM3VLB) SOTA Island Award is a special award for SOTA activators
+    who have activated the most Island summits (GM/SI) in Scotland.
+
     The award is named in memory of Andre Saunders, a passionate island activator.
-    More details of the actual award can be found on this SOTA reflector [post](https://reflector.sota.org.uk/t/andre-saunders-gm3vlb-sota-island-award/27642).
-    Tool designed by [GM5ALX](https://gm5alx.uk), source code [here](https://github.com/alexjj/island-awards).
+
+    More details of the actual award can be found on this SOTA reflector
+    [post](https://reflector.sota.org.uk/t/andre-saunders-gm3vlb-sota-island-award/27642).
+
+    Tool designed by [GM5ALX](https://gm5alx.uk),
+    source code [here](https://github.com/alexjj/island-awards).
     ''')
